@@ -70,11 +70,11 @@ def main():
         pass
 
     # ============================================================== FUNCTION SPACES ======================================================= #
-    Vh = dolfinx.fem.functionspace(mesh, ("Lagrange", 2, (mesh.geometry.dim,))) # State velocity space
-    Ph = dolfinx.fem.functionspace(mesh, ("Lagrange", 1))                      # State pressure space
-    Uh = dolfinx.fem.functionspace(mesh, ("Lagrange", 2, (mesh.geometry.dim,))) # Control space
-    Zh = Vh.clone() # Adjoint velocity space
-    Wh = Ph.clone() # Adjoint pressure space
+    Vh = dolfinx.fem.functionspace(mesh, ("Lagrange", 2, (mesh.geometry.dim,))) 
+    Ph = dolfinx.fem.functionspace(mesh, ("Lagrange", 1))                      
+    Uh = dolfinx.fem.functionspace(mesh, ("Lagrange", 2, (mesh.geometry.dim,))) # control space must live in the state velocity space
+    Zh = Vh.clone()
+    Wh = Ph.clone()
 
     # ============================================================== RESTRICTIONS ======================================================= #
     dofs_Vh = np.arange(Vh.dofmap.index_map.size_local + Vh.dofmap.index_map.num_ghosts)
