@@ -4,7 +4,7 @@ import gmsh
 import mpi4py.MPI
 import numpy as np
 
-# Import parameters for geometry definition
+
 from parameters import (
     mesh_size, Y, X, L, B, H_1, H_2, L_1, L_2, N, M,
     inlet_tag, wall_tag, control_tag, obs_tag, mu4, mu5, mu6
@@ -18,7 +18,7 @@ def create_domain_and_mesh(comm: mpi4py.MPI.Comm):
     gmsh.initialize()
     gmsh.model.add("mesh")
 
-    # Define points (p0 to p10)
+    # points
     p0 = gmsh.model.geo.addPoint(0.0, X, 0.0, mesh_size)
     p1 = gmsh.model.geo.addPoint(L - mu4, X, 0.0, mesh_size)
     p2 = gmsh.model.geo.addPoint(L, X, 0.0, mesh_size)
@@ -31,7 +31,7 @@ def create_domain_and_mesh(comm: mpi4py.MPI.Comm):
     p9 = gmsh.model.geo.addPoint(L - mu4, Y, 0.0, mesh_size)
     p10 = gmsh.model.geo.addPoint(0.0, Y, 0.0, mesh_size)
 
-    # Define lines (l0 to l13)
+    # lines
     l0 = gmsh.model.geo.addLine(p0, p1)
     l1 = gmsh.model.geo.addLine(p1, p2)
     l2 = gmsh.model.geo.addLine(p2, p3)
@@ -47,7 +47,7 @@ def create_domain_and_mesh(comm: mpi4py.MPI.Comm):
     l12 = gmsh.model.geo.addLine(p2, p5)
     l13 = gmsh.model.geo.addLine(p5, p8)
 
-    # Define surfaces (subdomains)
+    # subdomains
     line_loop_rectangle_left = gmsh.model.geo.addCurveLoop([l0, l11, l9, l10])
     line_loop_rectangle_right = gmsh.model.geo.addCurveLoop([l1, l12, l13, l8, -l11])
     line_loop_bifurcation_top = gmsh.model.geo.addCurveLoop([l5, l6, l7, -l13])
@@ -60,7 +60,7 @@ def create_domain_and_mesh(comm: mpi4py.MPI.Comm):
 
     gmsh.model.geo.synchronize()
 
-    # Tag boundaries
+    # add tags to the boundaries
     gmsh.model.addPhysicalGroup(1, [l10], inlet_tag)
     gmsh.model.setPhysicalName(1, inlet_tag, "Gamma_in")
     gmsh.model.addPhysicalGroup(1, [l0, l1, l2, l4, l5, l7, l8, l9], wall_tag)
@@ -70,17 +70,15 @@ def create_domain_and_mesh(comm: mpi4py.MPI.Comm):
     gmsh.model.addPhysicalGroup(1, [l11], obs_tag)
     gmsh.model.setPhysicalName(1, obs_tag, "Gamma_obs")
 
-    # Tag subdomains
+    # add tags to the subdomains
     gmsh.model.addPhysicalGroup(2, [rectangle_left], 1)
     gmsh.model.addPhysicalGroup(2, [rectangle_right], 2)
     gmsh.model.addPhysicalGroup(2, [bifurcation_top], 3)
     gmsh.model.addPhysicalGroup(2, [bifurcation_bottom], 4)
 
-    # Generate mesh
     gmsh.model.mesh.generate(2)
 
-    # Convert gmsh to dolfinx
-    partitioner = dolfinx.mesh.create_cell_partitioner(dolfinx.mesh.GhostMode.shared_facet)
+    ptr = dolfinx.mesh.create_cell_partitioner(dolfinx.mesh.GhostMode.shared_facet)
 
     try:
         mesh, subdomains, boundaries_and_interfaces, *_ = dolfinx.io.gmsh.model_to_mesh(
@@ -88,7 +86,7 @@ def create_domain_and_mesh(comm: mpi4py.MPI.Comm):
             comm=comm,
             rank=0,
             gdim=2,
-            partitioner=partitioner,
+            partitioner=ptr,
         )
     finally:
         gmsh.finalize()
