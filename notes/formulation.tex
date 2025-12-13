@@ -1,0 +1,48 @@
+\documentclass[hidelinks]{article}
+\usepackage[a4paper, total={7in, 10in}]{geometry}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{tkz-euclide}
+\usepackage[unicode]{hyperref}
+\usepackage[all]{hypcap}
+\usepackage{fancyhdr}
+\usepackage{amsfonts}
+\usepackage{float}
+
+\usetikzlibrary{angles,calc, decorations.pathreplacing}
+
+\definecolor{carminered}{rgb}{1.0, 0.0, 0.22}
+\definecolor{capri}{rgb}{0.0, 0.75, 1.0}
+\definecolor{brightlavender}{rgb}{0.75, 0.58, 0.89}
+
+\begin{document}
+
+We want to solve the optimal control problem given by $$\text{min}\: J(v,p,u)=\frac{1}{2} \int_{\Gamma_{obs}} |v-v_d|^2ds + \frac{\alpha_1}{2}\int_{\Gamma_C} |\nabla_t u|^2ds+\frac{\alpha_2}{2}\int_{\Gamma_C} |u|^2ds$$
+s.t.
+\begin{equation}\label{stokes}
+    \begin{cases}
+- \nu \Delta v + \nabla p = f       & \text{in } \Omega\\
+             \text{div} v = 0       & \text{in } \Omega\\
+                        v = g       & \text{on } \Gamma_{in}\\
+                        v = 0       & \text{on } \Gamma_{w}\\
+   p n - \nu \partial_n v = u       & \text{on } \Gamma_{C}
+\end{cases}.
+\end{equation}\newline
+
+
+We want to solve this configuration by considering a 2D realistic representation of an arterial bifurcation, parametrized as shown in Fig.~\ref{domain}.
+We consider an inverse problem in hemodynamics, focusing on a simplified model of an arterial bifurcation. The computational domain is parametrized, with an inflow boundary denoted as \( \Gamma_{\text{in}} \), two outflow boundaries \( \Gamma_C \), and the physical vessel wall represented by \( \Gamma_D \) (see Figure \ref{fig:bifurcation}). The primary variables of interest are the velocity $\vec{v}$ and pressure $p$, which are assumed to satisfy~\eqref{stokes}.
+
+\begin{figure}[H]
+\centering
+    \includegraphics[width=0.6\textwidth]{assets/bif.pdf}
+    \caption{2D representation of the arterial bifurcation considered for this implementation.}
+    \label{domain}
+\end{figure}
+
+We assume that the velocity profile is known along a segment of the inflow boundary \( \Gamma_{\text{in}} \), but no direct measurements of the Neumann flux at the outflow boundaries \( \Gamma_C \) are available. The control variable in this problem is the unknown Neumann flux at \( \Gamma_C \). The goal is to deduce this control variable using the velocity data along \( \Gamma_{\text{in}} \), and consequently, to recover the velocity and pressure fields across the entire domain.
+
+The problem involves several parameters, including geometric parameters \( \mu_{\text{geom}} \), which describe the dimensions of the bifurcation (e.g., the length of each branch, the angle of the bifurcation), a parametrized velocity profile \( \mu_{\text{meas}} \), and a parametrized inflow velocity profile \( g(\mu_{\text{in}}) \). These parameters together influence the flow field that we aim to reconstruct. This formulation represents a simplified version of the more complex hemodynamic flow problem, assuming two-dimensional geometry, steady-state conditions, and simplified constitutive laws. We further assume that the measured velocity profile can be approximated by a simple analytical function, parametrized for the data assimilation process.
+
+\end{document}

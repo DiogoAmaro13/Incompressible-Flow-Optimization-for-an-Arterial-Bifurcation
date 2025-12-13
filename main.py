@@ -34,7 +34,7 @@ def main():
         np.isin(boundaries_and_interfaces.values, (inlet_tag, wall_tag))
     ]
 
-    # --- Setup integration measure dS on the observation interface ---
+    # integration measure dS on the observation interface
     integration_entities_on_Gamma_obs = dolfinx.fem.compute_integration_domains(
         dolfinx.fem.IntegralType.interior_facet, mesh.topology, interfaces_obs)
 
