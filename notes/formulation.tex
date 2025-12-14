@@ -9,6 +9,8 @@
 \usepackage{fancyhdr}
 \usepackage{amsfonts}
 \usepackage{float}
+\usepackage{subcaption}
+\usepackage{caption}
 
 \usetikzlibrary{angles,calc, decorations.pathreplacing}
 
@@ -34,11 +36,19 @@ s.t.
 We want to solve this configuration by considering a 2D realistic representation of an arterial bifurcation, parametrized as shown in Fig.~\ref{domain}.
 We consider an inverse problem in hemodynamics, focusing on a simplified model of an arterial bifurcation. The computational domain is parametrized, with an inflow boundary denoted as \( \Gamma_{\text{in}} \), two outflow boundaries \( \Gamma_C \), and the physical vessel wall represented by \( \Gamma_D \). The primary variables of interest are the velocity $\vec{v}$ and pressure $p$, which are assumed to satisfy~\eqref{stokes}.
 
-\begin{figure}[H]
-\centering
-    \includegraphics[width=0.6\textwidth]{assets/bif.pdf}
+\begin{figure}[H]\label{domain}
+     \centering
+     \begin{subfigure}[t]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{assets/bif.pdf}
+         \caption{Boundary conditions: no-slip conditions on $\Gamma_D(\mu)$, Poiseuille velocity profile $g(\mu_{in})$ on $\Gamma_{in}$, unknown Neumann flux on the outflow sections.}
+     \end{subfigure}
+     \begin{subfigure}[t]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{assets/mu_param.pdf}
+         \caption{Parametrization of the original domain}
+     \end{subfigure}
     \caption{2D representation of the arterial bifurcation considered for this implementation.}
-    \label{domain}
 \end{figure}
 
 We assume that the velocity profile is known along a segment of the inflow boundary \( \Gamma_{\text{in}} \), but no direct measurements of the Neumann flux at the outflow boundaries \( \Gamma_C \) are available. The control variable in this problem is the unknown Neumann flux at \( \Gamma_C \). The goal is to deduce this control variable using the velocity data along \( \Gamma_{\text{in}} \), and consequently, to recover the velocity and pressure fields across the entire domain.
