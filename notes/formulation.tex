@@ -1,0 +1,90 @@
+\section{Problem Formulation}
+
+We want to solve the optimal control problem given by $$\text{min}\: J(v,p,u)=\frac{1}{2} \int_{\Gamma_{obs}} |v-v_d|^2ds + \frac{\alpha_1}{2}\int_{\Gamma_C} |\nabla_t u|^2ds+\frac{\alpha_2}{2}\int_{\Gamma_C} |u|^2ds$$
+s.t.
+\begin{equation}\label{stokes}
+    \begin{cases}
+- \nu \Delta v + \nabla p = f       & \text{in } \Omega\\
+             \text{div} v = 0       & \text{in } \Omega\\
+                        v = g       & \text{on } \Gamma_{in}\\
+                        v = 0       & \text{on } \Gamma_{w}\\
+   p n - \nu \partial_n v = u       & \text{on } \Gamma_{C}
+\end{cases}.
+\end{equation}
+
+where we assume $\alpha_2=0.1\alpha_1$ and $\alpha_1=10^{-3}$.\newline
+
+\noindent We further consider a 2D realistic representation of an arterial bifurcation, parametrized as shown in Fig.~\ref{domain}. We 
+consider an inverse problem in hemodynamics, focusing on a simplified model of an arterial bifurcation. The computational domain is parametrized, with an 
+inflow boundary denoted as \( \Gamma_{\text{in}} \), two outflow boundaries \( \Gamma_C \), and the physical vessel wall represented by \( \Gamma_D \). 
+The primary variables of interest are the velocity $\vec{v}$ and pressure $p$, which are assumed to satisfy~\eqref{stokes}.
+
+\begin{figure}[H] 
+    \label{domain}
+     \centering
+     \begin{subfigure}[t]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{assets/bif.pdf}
+         \caption{Boundary conditions: no-slip conditions on $\Gamma_D(\mu)$, Poiseuille velocity profile $g(\mu_{in})$ on $\Gamma_{in}$, unknown Neumann flux on the outflow sections.}
+     \end{subfigure}
+     \begin{subfigure}[t]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{assets/mu_param.pdf}
+         \caption{Parametrization of the original domain}
+     \end{subfigure}
+    \caption{2D representation of the arterial bifurcation considered for this implementation.}
+\end{figure}
+
+We assume that the velocity profile is known along a segment of the inflow boundary \( \Gamma_{\text{in}} \), but no direct measurements of the Neumann 
+flux at the outflow boundaries \( \Gamma_C \) are available. The control variable in this problem is the unknown Neumann flux at \( \Gamma_C \). The goal 
+is to deduce this control variable using the velocity data along \( \Gamma_{\text{in}} \), and consequently, to recover the velocity and pressure fields 
+across the entire domain.
+
+The problem involves several parameters, including geometric parameters \( \mu_{\text{geom}} \), which describe the dimensions of the bifurcation 
+(e.g., the length of each branch, the angle of the bifurcation), a parametrized velocity profile \( \mu_{\text{meas}} \), and a parametrized inflow 
+velocity profile \( g(\mu_{\text{in}}) \), given by the following Poiseuille parabolic profile
+\[
+g(\mu_{\text{in}}) = \begin{cases}
+10\mu_8(x_2+1)(1-x_2) & \text{in } \Omega \\
+0 & \text{elsewhere}
+\end{cases}
+\]
+with a parametrized peak velocity equal to \( \tilde{v} = 10 \mu_8 \, \text{cm/s}^{-1} \). The kinematic viscosity is \( \nu = 0.04 \, \text{cm}^2 \text{s}^{-1} \), resulting in a Reynolds 
+number \( Re = \frac{\tilde{v} l}{\nu} \approx 500 \), assuming \( l \) is the diameter of the large vessel and \( \mu_8 = 1 \).
+
+
+
+These parameters together influence the flow field that we aim to reconstruct. This formulation represents a 
+simplified version of the more complex hemodynamic flow problem, assuming two-dimensional geometry, steady-state conditions, and simplified constitutive 
+laws. We further assume that the measured velocity profile can be approximated by a simple analytical function, parametrized for the data assimilation 
+process as
+$$
+v_d(\mathbf{\mu})= \begin{cases}
+\mu_8((\mu_7 \eta_1(x_2))+(1-\mu_7)\eta_2(x_2)) & \text{in } \Gamma_{obs} \\
+0 & \text{elsewhere}
+\end{cases}
+$$
+where it is assumed that $\eta_1(x_3)=10(x_3^3-x_3^2-x_3+1)$ and $\eta_2(x_3)=10(-x_3^3-x_3^2+x_3+1)$. To prevent potential flow reversals in either 
+branch when the vertical velocity remains unmonitored, we impose a zero vertical velocity condition despite its physical shortcomings. This constraint 
+is particularly questionable when $\mu_7 \neq 0.5$, as such conditions would realistically produce non-zero vertical flow at $\Gamma_{obs}$. Meanwhile, our horizontal 
+velocity profile is designed with a parameterized form that stays positive throughout, which has the advantage of automatically preserving mass balance 
+regardless of how $\mu_7$ and $\mu_8$ vary.\newline
+
+\noindent Finally, the parameter domain is given by
+$$
+D = \{\mu = (\mu_{1},\ldots,\mu_{8}) \in \mathbb{R}^{8} :\ \mu_{i} \in [\mu_{\text{min},i}, \mu_{\text{Max},i}] \ \ \forall i = 1,\ldots,8 \}.
+$$
+
+where
+
+$$
+\mu_{\text{min}} = (0.7 \quad \pi/7 \quad \pi/7 \quad 0.7 \quad 1.5 \quad 1.5 \quad 0.0 \quad 0.5),
+$$
+$$
+\mu_{\text{Max}} = (1.3 \quad \pi/3 \quad \pi/3 \quad 1.2 \quad 2.5 \quad 2.5 \quad 1 \quad 1.5).
+$$
+Therefore, we want to solve optimal control problem stated as
+$$
+\text{minimize } J(\cdot;\mu) \quad \text{subject to~\eqref{stokes}}, \quad \text{given } \mu \in D.
+$$
+utilizing a one-shot approach, i.e., we solve for the control, state and adjoint simultaneously.
