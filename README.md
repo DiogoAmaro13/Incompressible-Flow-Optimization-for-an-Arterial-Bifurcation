@@ -1,5 +1,5 @@
 # Data Assimilation in Hemodynamics
-A modular dolfinx-based implementation to solve the optimal control problem associated with blood flow within an arterial bifurcation. Assuming there exists a parametrized velocity measurement inside the artery, we want to find the control variable in order to retrieve the velocity and pressure fields in the whole domain. For more details, we refer to the problem [formulation](notes/formulation.pdf).
+A modular dolfinx-based implementation to solve the optimal control problem associated with blood flow within an arterial bifurcation. Assuming there exists a parametrized velocity measurement inside the artery, we want to find the control variable in order to retrieve the velocity and pressure fields in the whole domain. For more details, we refer to Chapter 1 of the [document](notes/main.pdf) supporting this code.
 
 ## Project Structure
 (under modifications)
